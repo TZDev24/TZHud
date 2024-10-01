@@ -26,7 +26,7 @@ healthBoxPosY = h - (ScrH() / 12)
 
 -- Now we draw our own hud
 hook.Add("HUDPaint", "TZHud_Draw", function()
-	surface.SetDrawColor(0, 0, 0, 128)
+	surface.SetDrawColor(0, 0, 0, 192)
 
 	-- Health and Armor background panel
 	surface.DrawRect(healthBoxPosX, healthBoxPosY, healthBoxW, healthBoxH)
@@ -53,6 +53,35 @@ hook.Add("HUDPaint", "TZHud_Draw", function()
 
 	-- Ammo (magazine / clip)
 	surface.SetFont("HudNumbersGlow")
-	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 8), healthBoxPosY)
+	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 2.5), healthBoxPosY)
+	surface.SetTextColor(255, 255, 0)
 	surface.DrawText(LocalPlayer():GetActiveWeapon():Clip1())
+
+	surface.SetFont("HudNumbers")
+	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 2.5), healthBoxPosY)
+	surface.DrawText(LocalPlayer():GetActiveWeapon():Clip1())
+
+	-- Ammo (Reserve)
+	surface.SetFont("HudNumbersGlow")
+	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY)
+	surface.SetTextColor(255, 160, 0)
+	ammoType = LocalPlayer():GetActiveWeapon():GetPrimaryAmmoType()
+	reserveAmmo = LocalPlayer():GetAmmoCount(ammoType)
+	surface.DrawText(reserveAmmo)
+
+	surface.SetFont("HudNumbers")
+	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY)
+	surface.DrawText(reserveAmmo)
+
+	-- Ammo (Secondary / Alt. Fire)
+	surface.SetFont("HudNumbersGlow")
+	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
+	surface.SetTextColor(128, 0, 255)
+	secondaryAmmoType = LocalPlayer():GetActiveWeapon():GetSecondaryAmmoType()
+	secondaryAmmo = LocalPlayer():GetAmmoCount(secondaryAmmoType)
+	surface.DrawText(secondaryAmmo)
+
+	surface.SetFont("HudNumbers")
+	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
+	surface.DrawText(secondaryAmmo)
 end)
