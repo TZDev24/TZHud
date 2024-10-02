@@ -24,64 +24,105 @@ healthBoxH = h / 16
 healthBoxPosX = w / 2 - (healthBoxW / 2)
 healthBoxPosY = h - (ScrH() / 12)
 
+-- Create variables for the HUD colors so we can more easily
+-- control and modify them
+local healthColor = Color(255, 0, 0)
+local armorColor = Color(0, 128, 255)
+
+local magazineColor = Color(255, 255, 0)
+local reserveAmmoColor = Color(255, 160, 0)
+local secondaryAmmoColor = Color(160, 0, 255)
+
+function checkUsesAmmo(weapon)
+	local ply = LocalPlayer()
+	local clip = weapon:Clip1()
+	local primAmmoType = weapon:GetPrimaryAmmoType()
+	local secAmmoType = weapon:GetSecondaryAmmoType()
+	local reserveAmmo = ply:GetAmmoCount(primAmmoType)
+	local secondaryAmmo = ply:GetAmmoCount(secAmmoType)
+
+	if clip <= 0 and reserveAmmo <= 0 and secondaryAmmo <= 0 then
+		return false
+	else
+		return true
+	end
+end
+
 -- Now we draw our own hud
 hook.Add("HUDPaint", "TZHud_Draw", function()
 	surface.SetDrawColor(0, 0, 0, 192)
 
-	-- Health and Armor background panel
-	surface.DrawRect(healthBoxPosX, healthBoxPosY, healthBoxW, healthBoxH)
+	local ply = LocalPlayer()
+	local health = ply:Health()
+	local armor = ply:Armor()
 
-	-- Health
-	surface.SetFont("HudNumbersGlow")
-	surface.SetTextPos(healthBoxPosX, healthBoxPosY)
-	surface.SetTextColor(255, 0, 0)
-	surface.DrawText(LocalPlayer():Health())
+	-- Check if the player is even alive before doing any of this
+	if ply:Alive() then
+		-- Health and Armor background panel
+		surface.DrawRect(healthBoxPosX, healthBoxPosY, healthBoxW, healthBoxH)
 
-	surface.SetFont("HudNumbers")
-	surface.SetTextPos(healthBoxPosX, healthBoxPosY)
-	surface.DrawText(LocalPlayer():Health())
+		-- Health
+		surface.SetFont("HudNumbersGlow")
+		surface.SetTextPos(healthBoxPosX, healthBoxPosY)
+		surface.SetTextColor(healthColor)
+		surface.DrawText(health)
 
-	--Armor
-	surface.SetFont("HudNumbersGlow")
-	surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
-	surface.SetTextColor(0, 96, 255)
-	surface.DrawText(LocalPlayer():Armor())
+		surface.SetFont("HudNumbers")
+		surface.SetTextPos(healthBoxPosX, healthBoxPosY)
+		surface.DrawText(health)
 
-	surface.SetFont("HudNumbers")
-	surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
-	surface.DrawText(LocalPlayer():Armor())
+		--Armor
+		surface.SetFont("HudNumbersGlow")
+		surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
+		surface.SetTextColor(armorColor)
+		surface.DrawText(armor)
 
-	-- Ammo (magazine / clip)
-	surface.SetFont("HudNumbersGlow")
-	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 2.5), healthBoxPosY)
-	surface.SetTextColor(255, 255, 0)
-	surface.DrawText(LocalPlayer():GetActiveWeapon():Clip1())
+		surface.SetFont("HudNumbers")
+		surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
+		surface.DrawText(armor)
 
-	surface.SetFont("HudNumbers")
-	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 2.5), healthBoxPosY)
-	surface.DrawText(LocalPlayer():GetActiveWeapon():Clip1())
+		-- Ammo (magazine / clip)
+		local weapon = ply:GetActiveWeapon()
 
-	-- Ammo (Reserve)
-	surface.SetFont("HudNumbersGlow")
-	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY)
-	surface.SetTextColor(255, 160, 0)
-	ammoType = LocalPlayer():GetActiveWeapon():GetPrimaryAmmoType()
-	reserveAmmo = LocalPlayer():GetAmmoCount(ammoType)
-	surface.DrawText(reserveAmmo)
+		if checkUsesAmmo(weapon) then
+			local clip = weapon:Clip1()
 
-	surface.SetFont("HudNumbers")
-	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY)
-	surface.DrawText(reserveAmmo)
+			surface.SetFont("HudNumbersGlow")
+			surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 2.5), healthBoxPosY)
+			surface.SetTextColor(magazineColor)
+			surface.DrawText(clip)
 
-	-- Ammo (Secondary / Alt. Fire)
-	surface.SetFont("HudNumbersGlow")
-	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
-	surface.SetTextColor(128, 0, 255)
-	secondaryAmmoType = LocalPlayer():GetActiveWeapon():GetSecondaryAmmoType()
-	secondaryAmmo = LocalPlayer():GetAmmoCount(secondaryAmmoType)
-	surface.DrawText(secondaryAmmo)
+			surface.SetFont("HudNumbers")
+			surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 2.5), healthBoxPosY)
+			surface.DrawText(clip)
 
-	surface.SetFont("HudNumbers")
-	surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
-	surface.DrawText(secondaryAmmo)
+			-- Ammo (Reserve)
+			local ammoType = ply:GetActiveWeapon():GetPrimaryAmmoType()
+			local secondAmmoType = weapon:GetSecondaryAmmoType()
+			local reserveAmmo = ply:GetAmmoCount(ammoType)
+			local secondaryAmmo = ply:GetAmmoCount(secondAmmoType)
+
+			surface.SetFont("HudNumbersGlow")
+			surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY)
+			surface.SetTextColor(reserveAmmoColor)
+			surface.DrawText(reserveAmmo)
+
+			surface.SetFont("HudNumbers")
+			surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY)
+			surface.DrawText(reserveAmmo)
+
+			-- Ammo (Secondary / Alt. Fire)
+			local secondaryAmmoType = weapon:GetSecondaryAmmoType()
+			local secondaryAmmo = ply:GetAmmoCount(secondaryAmmoType)
+
+			surface.SetFont("HudNumbersGlow")
+			surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
+			surface.SetTextColor(secondaryAmmoColor)
+			surface.DrawText(secondaryAmmo)
+
+			surface.SetFont("HudNumbers")
+			surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
+			surface.DrawText(secondaryAmmo)
+		end
+	end
 end)
