@@ -41,7 +41,10 @@ function checkUsesAmmo(weapon)
 	local reserveAmmo = ply:GetAmmoCount(primAmmoType)
 	local secondaryAmmo = ply:GetAmmoCount(secAmmoType)
 
-	if clip <= 0 and reserveAmmo <= 0 and secondaryAmmo <= 0 then
+	if
+		clip == -1 and reserveAmmo <= 0 and secondaryAmmo <= 0
+		or ply:GetActiveWeapon():GetClass() == "weapon_physcannon"
+	then
 		return false
 	else
 		return true
