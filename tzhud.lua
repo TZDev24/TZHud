@@ -74,15 +74,18 @@ hook.Add("HUDPaint", "TZHud_Draw", function()
 		surface.SetTextPos(healthBoxPosX, healthBoxPosY)
 		surface.DrawText(health)
 
-		--Armor
-		surface.SetFont("HudNumbersGlow")
-		surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
-		surface.SetTextColor(armorColor)
-		surface.DrawText(armor)
+		-- Armor
+		-- Only draw Armor if the player has any
+		if LocalPlayer():Armor() > 0 then
+			surface.SetFont("HudNumbersGlow")
+			surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
+			surface.SetTextColor(armorColor)
+			surface.DrawText(armor)
 
-		surface.SetFont("HudNumbers")
-		surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
-		surface.DrawText(armor)
+			surface.SetFont("HudNumbers")
+			surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
+			surface.DrawText(armor)
+		end
 
 		-- Ammo (magazine / clip)
 		local weapon = ply:GetActiveWeapon()
@@ -115,17 +118,18 @@ hook.Add("HUDPaint", "TZHud_Draw", function()
 			surface.DrawText(reserveAmmo)
 
 			-- Ammo (Secondary / Alt. Fire)
-			local secondaryAmmoType = weapon:GetSecondaryAmmoType()
-			local secondaryAmmo = ply:GetAmmoCount(secondaryAmmoType)
+			-- Like armor, only draw if the player actually has any
 
-			surface.SetFont("HudNumbersGlow")
-			surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
-			surface.SetTextColor(secondaryAmmoColor)
-			surface.DrawText(secondaryAmmo)
+			if secondaryAmmo > 0 then
+				surface.SetFont("HudNumbersGlow")
+				surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
+				surface.SetTextColor(secondaryAmmoColor)
+				surface.DrawText(secondaryAmmo)
 
-			surface.SetFont("HudNumbers")
-			surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
-			surface.DrawText(secondaryAmmo)
+				surface.SetFont("HudNumbers")
+				surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
+				surface.DrawText(secondaryAmmo)
+			end
 		end
 	end
 end)
