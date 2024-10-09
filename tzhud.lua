@@ -26,12 +26,12 @@ healthBoxPosY = h - (ScrH() / 12)
 
 -- Create variables for the HUD colors so we can more easily
 -- control and modify them
-local healthColor = Color(255, 0, 0)
-local armorColor = Color(0, 128, 255)
+local healthColor = Color(255, 0, 0, 255)
+local armorColor = Color(0, 128, 255, 255)
 
 local magazineColor = Color(255, 255, 0)
 local reserveAmmoColor = Color(255, 160, 0)
-local secondaryAmmoColor = Color(160, 0, 255)
+local secondaryAmmoColor = Color(160, 0, 255, 0)
 
 function checkUsesAmmo(weapon)
 	local ply = LocalPlayer()
@@ -50,6 +50,9 @@ function checkUsesAmmo(weapon)
 		return true
 	end
 end
+
+local secAmmoFadeInSpeed = 2
+local secAmmoFadeOutSpeed = 5
 
 -- Now we draw our own hud
 hook.Add("HUDPaint", "TZHud_Draw", function()
@@ -76,16 +79,31 @@ hook.Add("HUDPaint", "TZHud_Draw", function()
 
 		-- Armor
 		-- Only draw Armor if the player has any
-		if LocalPlayer():Armor() > 0 then
-			surface.SetFont("HudNumbersGlow")
-			surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
-			surface.SetTextColor(armorColor)
-			surface.DrawText(armor)
 
-			surface.SetFont("HudNumbers")
-			surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
-			surface.DrawText(armor)
+		if armor > 0 then
+			if armorColor.a < 255 then
+				armorColor.a = armorColor.a + 2
+				if armorColor.a > 255 then
+					armorColor.a = 255
+				end
+			end
+		else
+			if armorColor.a > 0 then
+				armorColor.a = armorColor.a - 2
+				if armorColor.a < 0 then
+					armorColor.a = 0
+				end
+			end
 		end
+
+		surface.SetFont("HudNumbersGlow")
+		surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
+		surface.SetTextColor(armorColor)
+		surface.DrawText(armor)
+
+		surface.SetFont("HudNumbers")
+		surface.SetTextPos(healthBoxPosX, healthBoxPosY + 32)
+		surface.DrawText(armor)
 
 		-- Ammo (magazine / clip)
 		local weapon = ply:GetActiveWeapon()
@@ -121,15 +139,29 @@ hook.Add("HUDPaint", "TZHud_Draw", function()
 			-- Like armor, only draw if the player actually has any
 
 			if secondaryAmmo > 0 then
-				surface.SetFont("HudNumbersGlow")
-				surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
-				surface.SetTextColor(secondaryAmmoColor)
-				surface.DrawText(secondaryAmmo)
-
-				surface.SetFont("HudNumbers")
-				surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
-				surface.DrawText(secondaryAmmo)
+				if secondaryAmmoColor.a < 255 then
+					secondaryAmmoColor.a = secondaryAmmoColor.a + secAmmoFadeInSpeed
+					if secondaryAmmoColor.a > 255 then
+						secondaryAmmoColor.a = 255
+					end
+				end
+			else
+				if secondaryAmmoColor.a > 0 then
+					secondaryAmmoColor.a = secondaryAmmoColor.a - secAmmoFadeOutSpeed
+					if secondaryAmmoColor.a < 0 then
+						secondaryAmmoColor.a = 0
+					end
+				end
 			end
+
+			surface.SetFont("HudNumbersGlow")
+			surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
+			surface.SetTextColor(secondaryAmmoColor)
+			surface.DrawText(secondaryAmmo)
+
+			surface.SetFont("HudNumbers")
+			surface.SetTextPos(healthBoxPosX + (healthBoxW - healthBoxW / 4), healthBoxPosY + 32)
+			surface.DrawText(secondaryAmmo)
 		end
 	end
 end)
